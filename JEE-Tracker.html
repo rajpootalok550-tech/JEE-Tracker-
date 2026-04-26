@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#f5f3ff"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="JEE Tracker"/>
+<link rel="manifest" href="manifest.json"/>
+<title>Alok's JEE Command Centre</title>
+<style>
+:root{
+  --bg:#f5f3ff;--bg2:#ffffff;--bg3:#ede9fe;--border:#ddd6fe;
+  --text:#1e1b4b;--text2:#4c1d95;--text3:#a78bfa;
+  --accent:#7c3aed;--accent2:#6d28d9;
+  --phy:#ea580c;--chem:#0369a1;--math:#7c3aed;
+  --green:#16a34a;--red:#dc2626;--yellow:#ca8a04;
+  --shadow:0 2px 16px rgba(124,58,237,0.10);
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body,#root{height:100%;width:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;font-size:16px}
+input,select,textarea{font-family:var(--font)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+input[type=date]::-webkit-calendar-picker-indicator{opacity:0.5}
+.header{background:linear-gradient(135deg,#7c3aed,#4338ca);padding:14px 16px 12px;padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:50;box-shadow:0 4px 24px rgba(109,40,217,0.22)}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.h-sub{font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;font-weight:500}
+.h-title{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.streak-fire{font-size:26px;line-height:1;text-align:right}
+.streak-txt{font-size:12px;color:#fcd34d;font-weight:600;margin-top:1px;text-align:right}
+.timers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tbtn{padding:10px 4px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.12);cursor:pointer;transition:all .2s;text-align:center}
+.tbtn.on{background:rgba(255,255,255,0.28);border-color:rgba(255,255,255,0.7)}
+.tbtn-lbl{font-size:10px;color:rgba(255,255,255,0.85);margin-bottom:3px;font-weight:600;letter-spacing:.5px}
+.tbtn-time{font-size:15px;font-weight:700;color:#fff;font-feature-settings:"tnum";letter-spacing:1px}
+.tbtn-status{font-size:9px;color:rgba(255,255,255,0.6);margin-top:2px}
+.content{padding:16px 14px 96px}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px}
+.inp{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);padding:12px 14px;font-size:16px;outline:none;width:100%;transition:border-color .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--text3)}
+.btn{background:var(--accent);border:none;color:#fff;border-radius:12px;padding:13px 20px;cursor:pointer;font-size:16px;font-weight:600;font-family:var(--font);box-shadow:0 3px 10px rgba(124,58,237,0.28)}
+.btn:active{opacity:.85}
+.btn-outline{background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:12px;padding:12px 16px;cursor:pointer;font-size:15px;font-weight:600;font-family:var(--font);width:100%;display:block;text-align:center}
+.filter-btn{padding:9px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);white-space:nowrap}
+.filter-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tag{font-size:11px;border-radius:8px;padding:4px 9px;font-weight:600;display:inline-block;border-width:1.5px;border-style:solid}
+.row{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1.5px solid var(--bg)}
+.row:last-child{border-bottom:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.sbox{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center}
+.sbox-val{font-size:22px;font-weight:700;letter-spacing:-0.5px}
+.sbox-lbl{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
+.bar-bg{background:var(--bg3);border-radius:8px;height:9px;overflow:hidden}
+.bar{height:9px;border-radius:8px;transition:width .6s ease}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -4px 20px rgba(124,58,237,0.08)}
+.nav button{flex:1;background:none;border:none;cursor:pointer;padding:9px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;font-family:var(--font);font-weight:500;color:#9ca3af}
+.nav button.on{color:var(--accent)}
+.nav-icon{font-size:22px}
+.picker-bg{position:fixed;inset:0;background:rgba(30,27,75,0.4);z-index:200;display:flex;align-items:flex-end;backdrop-filter:blur(6px)}
+.picker{background:#fff;border-radius:24px 24px 0 0;padding:20px 16px 36px;width:100%;max-height:75vh;display:flex;flex-direction:column}
+.picker-title{font-size:19px;font-weight:700;color:var(--text);margin-bottom:3px}
+.picker-sub{font-size:14px;margin-bottom:14px;font-weight:500}
+.picker-list{overflow-y:auto;flex:1}
+.picker-item{display:flex;align-items:center;justify-content:space-between;padding:15px 12px;border-radius:12px;cursor:pointer;margin-bottom:3px;font-size:15px;font-weight:500;color:var(--text)}
+.picker-item:active{background:var(--bg)}
+.picker-item.sel{background:var(--bg3);color:var(--accent);font-weight:700}
+.mood-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;cursor:pointer;font-size:28px;text-align:center;flex:1}
+.mood-btn.on{background:var(--bg3);border-color:var(--accent)}
+.hmap-cell{border-radius:4px;aspect-ratio:1}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const{useState,useEffect,useCallback}=React;
+const CHAPTERS={
+  Physics:["Units & Measurements","Kinematics","Laws of Motion","Work, Energy & Power","Rotational Motion","Gravitation","Properties of Solids & Liquids","Thermodynamics","Kinetic Theory of Gases","Oscillations (SHM)","Waves","Electrostatics","Current Electricity","Magnetic Effects of Current","Magnetism & Matter","Electromagnetic Induction","Alternating Current","Electromagnetic Waves","Ray Optics","Wave Optics","Dual Nature of Matter","Atoms & Nuclei","Semiconductor Devices","Communication Systems","Fluid Mechanics","Thermal Expansion","Capacitors","Center of Mass","Error Analysis"],
+  Chemistry:["Basic Concepts (Mole Concept)","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Redox Reactions","Electrochemistry","Chemical Kinetics","Surface Chemistry","Periodic Table","Hydrogen & s-Block","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry","GOC (General Organic Chemistry)","Hydrocarbons","Haloalkanes & Haloarenes","Alcohols, Phenols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers","Chemistry in Everyday Life","Isomerism","Reaction Mechanisms","Salt Analysis"],
+  Math:["Sets, Relations & Functions","Complex Numbers","Quadratic Equations","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Straight Lines","Circles","Parabola","Ellipse","Hyperbola","Limits","Continuity & Differentiability","Differentiation","Applications of Derivatives","Indefinite Integration","Definite Integration","Differential Equations","Vectors","3D Geometry","Probability","Statistics","Mathematical Reasoning","Trigonometric Functions","Inverse Trigonometry","Height & Distance","Mathematical Induction"]
+};
+const SUBS=["Physics","Chemistry","Math"];
+const SC={Physics:"#ea580c",Chemistry:"#0369a1",Math:"#7c3aed"};
+const SBG={Physics:"#fff7ed",Chemistry:"#f0f9ff",Math:"#f5f3ff"};
+const SBR={Physics:"#fed7aa",Chemistry:"#bae6fd",Math:"#ddd6fe"};
+const PRIO_C={High:"#dc2626",Medium:"#ca8a04",Low:"#16a34a"};
+const TABS=["Daily","Homework","Weekly","Monthly","Mocks","Stats"];
+const TI=["📅","📝","📊","🗓️","🎯","📈"];
+function dk(d=new Date()){return d.toISOString().split("T")[0]}
+function wkStart(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-x.getDay());return dk(x)}
+function mKey(d=new Date()){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
+function ld(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function fmtT(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sc).padStart(2,"0")}`}
+function useTimer(){
+  const[active,setActive]=useState(null);
+  const[sessions,setSessions]=useState(()=>ld("jt_sess",{}));
+  const[tick,setTick]=useState(0);
+  useEffect(()=>{const t=setInterval(()=>setTick(n=>n+1),1000);return()=>clearInterval(t)},[]);
+  const commit=useCallback((sub,ms)=>{
+    const el=Math.floor((Date.now()-ms)/1000);if(el<1)return;
+    const td=dk();
+    setSessions(p=>{const n={...p,[td]:{...(p[td]||{}),[sub]:((p[td]||{})[sub]||0)+el}};sv("jt_sess",n);return n});
+  },[]);
+  function start(sub){if(active)commit(active.sub,active.ms);setActive({sub,ms:Date.now()})}
+  function stop(){if(!active)return;commit(active.sub,active.ms);setActive(null)}
+  function liveSecs(sub){const td=dk();return((sessions[td]||{})[sub]||0)+(active?.sub===sub?Math.floor((Date.now()-active.ms)/1000):0)}
+  function daySecs(dateKey,sub){return(sessions[dateKey]||{})[sub]||0}
+  return{active,start,stop,liveSecs,daySecs,sessions};
+}
+function Card({title,children}){return<div className="card"><div className="card-title">{title}</div>{children}</div>}
+function SBox({label,value,color}){return<div className="sbox"><div className="sbox-val" style={{color}}>{value}</div><div className="sbox-lbl">{label}</div></div>}
+function ProgBar({pct,color}){return<div className="bar-bg"><div className="bar" style={{width:`${Math.min(pct,100)}%`,background:color}}/></div>}
+function SubSel({val,onChange}){return<select value={val} onChange={e=>onChange(e.target.value)} className="inp" style={{color:SC[val],fontWeight:700,width:"auto",flexShrink:0}}>{SUBS.map(s=><option key={s} style={{color:SC[s]}}>{s}</option>)}</select>}
+function ChapterPicker({sub,selected,onSelect,onClose}){
+  const[search,setSearch]=useState("");
+  const filtered=(CHAPTERS[sub]||[]).filter(c=>c.toLowerCase().includes(search.toLowerCase()));
+  return<div className="picker-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div className="picker">
+      <div className="picker-title">📚 Chapter Select Karo</div>
+      <div className="picker-sub" style={{color:SC[sub]}}>{sub}</div>
+      <input className="inp" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:12}}/>
+      <div className="picker-list">
+        <div className="picker-item" onClick={()=>{onSelect("");onClose()}} style={{color:"#9ca3af"}}>— Koi chapter nahi —</div>
+        {filtered.map(c=><div key={c} className={`picker-item${selected===c?" sel":""}`} onClick={()=>{onSelect(c);onClose()}}>
+          <span>{c}</span>{selected===c&&<span style={{color:SC[sub]}}>✓</span>}
+        </div>)}
+      </div>
+    </div>
+  </div>
+}
+function Daily({timer}){
+  const today=dk();
+  const[goals,setGoals]=useState(()=>ld(`jt_g_${today}`,[]));
+  const[ng,setNg]=useState("");const[ns,setNs]=useState("Math");const[nch,setNch]=useState("");
+  const[showGCP,setShowGCP]=useState(false);
+  const[mood,setMood]=useState(()=>ld(`jt_mood_${today}`,0));
+  const[journal,setJournal]=useState(()=>ld(`jt_jrn_${today}`,""));
+  const[learned,setLearned]=useState(()=>ld(`jt_lrn_${today}`,[]));
+  const[nl,setNl]=useState("");const[nls,setNls]=useState("Math");const[nlch,setNlch]=useState("");const[nltopic,setNltopic]=useState("");
+  const[showLCP,setShowLCP]=useState(false);
+  function sg(g){setGoals(g);sv(`jt_g_${today}`,g)}
+  function addG(){if(!ng.trim())return;sg([...goals,{id:Date.now(),text:ng.trim(),sub:ns,chapter:nch,done:false}]);setNg("");setNch("")}
+  function togG(id){sg(goals.map(g=>g.id===id?{...g,done:!g.done}:g))}
+  function delG(id){sg(goals.filter(g=>g.id!==id))}
+  function saveMood(v){setMood(v);sv(`jt_mood_${today}`,v)}
+  function saveJ(v){setJournal(v);sv(`jt_jrn_${today}`,v)}
+  function addL(){
+    if(!nl.trim())return;
+    const n=[...learned,{id:Date.now(),text:nl.trim(),sub:nls,chapter:nlch,topic:nltopic}];
+    setLearned(n);sv(`jt_lrn_${today}`,n);setNl("");setNlch("");setNltopic("");
+  }
+  function delL(id){const n=learned.filter(l=>l.id!==id);setLearned(n);sv(`jt_lrn_${today}`,n)}
+  const done=goals.filter(g=>g.done).length;
+  const pct=goals.length?Math.round(done/goals.length*100):0;
+  const R=30,C=2*Math.PI*R;
+  return<div className="content">
+    <Card title="📌 Aaj Ka Progress">
+      <div style={{display:"flex",alignItems:"center",gap:20}}>
+        <svg width={76} height={76} style={{flexShrink:0}}>
+          <circle cx={38} cy={38} r={R} fill="none" stroke="#ede9fe" strokeWidth={8}/>
+          <circle cx={38} cy={38} r={R} fill="none" stroke="#7c3aed" strokeWidth={8}
+            strokeDasharray={`${C*pct/100} ${C}`} strokeLinecap="round" transform="rotate(-90 38 38)"/>
+          <text x={38} y={44} textAnchor="middle" fill="#1e1b4b" fontSize={17} fontWeight="bold">{pct}%</text>
+        </svg>
+        <div>
+          <div style={{fontSize:18,fontWeight:700,color:"#1e1b4b",marginBottom:5}}>{done} of {goals.length} goals</div>
+          <div style={{fontSize:14,color:"#a78bfa"}}>{new Date().toDateString()}</div>
+          {pct===100&&goals.length>0&&<div style={{fontSize:14,color:"#16a34a",marginTop:6,fontWeight:600}}>🎉 Sab complete!</div>}
+        </div>
+      </div>
+    </Card>
+    <Card title="🎯 Aaj Ke Goals">
+      <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+        <SubSel val={ns} onChange={v=>{setNs(v);setNch("")}}/>
+        <button className="btn-outline" style={{flex:1,fontSize:14,padding:"10px 8px",minWidth:0,
+          color:nch?SC[ns]:"#a78bfa",borderColor:nch?SC[ns]:"#ddd6fe"}} onClick={()=>setShowGCP(true)}>
+          {nch?`📚 ${nch.length>16?nch.slice(0,16)+"…":nch}`:"📚 Chapter"}
+        </button>
+      </div>
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        <input className="inp" value={ng} onChange={e=>setNg(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addG()} placeholder="Goal likhao..." style={{flex:1}}/>
+        <button className="btn" onClick={addG} style={{flexShrink:0,padding:"10px 20px",fontSize:20}}>+</button>
+      </div>
+      {goals.length===0&&<div style={{color:"#a78bfa",fontSize:15,textAlign:"center",padding:"12px 0"}}>Koi goal nahi — add karo! 💪</div>}
+      {goals.map(g=><div key={g.id} className="row">
+        <input type="checkbox" checked={g.done} onChange={()=>togG(g.id)} style={{accentColor:"#7c3aed",width:21,height:21,flexShrink:0,marginTop:2}}/>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,textDecoration:g.done?"line-through":"none",color:g.done?"#9ca3af":"#1e1b4b",fontWeight:500,marginBottom:5}}>{g.text}</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            <span className="tag" style={{color:SC[g.sub],borderColor:SBR[g.sub],background:SBG[g.sub]}}>{g.sub}</span>
+            {g.chapter&&<span className="tag" style={{color:"#6d28d9",borderColor:"#ddd6fe",background:"#f5f3ff"}}>📚 {g.chapter.length>18?g.chapter.slice(0,18)+"…":g.chapter}</span>}
+          </div>
+        </div>
+        <button onClick={()=>delG(g.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:20,flexShrink:0}}>✕</button>
+      </div>)}
+      {showGCP&&<ChapterPicker sub={ns} selected={nch} onSelect={setNch} onClose={()=>setShowGCP(false)}/>}
+    </Card>
+    <Card title="💡 Aaj Kya Seekha">
+      <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+        <SubSel val={nls} onChange={v=>{setNls(v);setNlch("")}}/>
+        <button className="btn-outline" style={{flex:1,fontSize:14,padding:"10px 8px",minWidth:0,
+          color:nlch?SC[nls]:"#a78bfa",borderColor:nlch?SC[nls]:"#ddd6fe"}} onClick={()=>setShowLCP(true)}>
+          {nlch?`📚 ${nlch.length>16?nlch.slice(0,16)+"…":nlch}`:"📚 Chapter"}
+        </button>
+      </div>
+      <input className="inp" value={nltopic} onChange={e=>setNltopic(e.target.value)} placeholder="Topic (e.g. Projectile Motion)..." style={{marginBottom:10}}/>
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        <input className="inp" value={nl} onChange={e=>setNl(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addL()} placeholder="Kya seekha aaj..." style={{flex:1}}/>
+        <button className="btn" onClick={addL} style={{flexShrink:0,padding:"10px 20px",fontSize:20}}>+</button>
+      </div>
+      {learned.length===0&&<div style={{color:"#a78bfa",fontSize:15,textAlign:"center",padding:"10px 0"}}>Kuch note karo aaj! 📖</div>}
+      {learned.map(l=><div key={l.id} className="row">
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,color:"#1e1b4b",fontWeight:500,marginBottom:5}}>{l.text}</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            <span className="tag" style={{color:SC[l.sub],borderColor:SBR[l.sub],background:SBG[l.sub]}}>{l.sub}</span>
+            {l.chapter&&<span className="tag" style={{color:"#6d28d9",borderColor:"#ddd6fe",background:"#f5f3ff"}}>📚 {l.chapter.length>18?l.chapter.slice(0,18)+"…":l.chapter}</span>}
+            {l.topic&&<span className="tag" style={{color:"#0369a1",borderColor:"#bae6fd",background:"#f0f9ff"}}>🔖 {l.topic}</span>}
+          </div>
+        </div>
+        <button onClick={()=>delL(l.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:20,flexShrink:0}}>✕</button>
+      </div>)}
+      {showLCP&&<ChapterPicker sub={nls} selected={nlch} onSelect={setNlch} onClose={()=>setShowLCP(false)}/>}
+    </Card>
+    <Card title="⚡ Aaj Ka Energy Level">
+      <div style={{display:"flex",gap:8}}>
+        {["😴","😕","😐","😊","🚀"].map((e,i)=><button key={i} onClick={()=>saveMood(i+1)} className={`mood-btn${mood===i+1?" on":""}`}>{e}</button>)}
+      </div>
+      {mood>0&&<div style={{textAlign:"center",fontSize:15,color:"#7c3aed",marginTop:12,fontWeight:600}}>
+        {["Bahut thaka hua 😴","Thoda down 😕","Theek hai 😐","Accha feel ho raha hai 😊","Full josh mein! 🚀"][mood-1]}
+      </div>}
+    </Card>
+    <Card title="📓 Aaj Ka Reflection">
+      <textarea className="inp" value={journal} onChange={e=>saveJ(e.target.value)} rows={4}
+        placeholder="Aaj kya accha gaya, kya nahi gaya, kal ke liye kya plan hai..." style={{resize:"vertical",lineHeight:1.7,fontSize:15}}/>
+    </Card>
+  </div>
+}
+function Homework(){
+  const today=dk();
+  const[hws,setHws]=useState(()=>ld("jt_hw",[]));
+  const[text,setText]=useState("");const[sub,setSub]=useState("Math");const[chapter,setChapter]=useState("");
+  const[topic,setTopic]=useState("");const[due,setDue]=useState(today);const[prio,setPrio]=useState("Medium");
+  const[filter,setFilter]=useState("Pending");const[showForm,setShowForm]=useState(false);const[showCP,setShowCP]=useState(false);
+  function sHws(h){setHws(h);sv("jt_hw",h)}
+  function add(){if(!text.trim())return;sHws([...hws,{id:Date.now(),text:text.trim(),sub,chapter,topic,due,prio,done:false,created:today}]);setText("");setChapter("");setTopic("");setShowForm(false)}
+  function tog(id){sHws(hws.map(h=>h.id===id?{...h,done:!h.done}:h))}
+  function del(id){sHws(hws.filter(h=>h.id!==id))}
+  const pending=hws.filter(h=>!h.done).length;
+  const overdue=hws.filter(h=>!h.done&&h.due<today).length;
+  const filtered=hws.filter(h=>filter==="All"?true:filter==="Pending"?!h.done:filter==="Done"?h.done:!h.done&&h.due<today).sort((a,b)=>a.done-b.done||a.due.localeCompare(b.due));
+  return<div className="content">
+    <div className="grid3" style={{marginBottom:14}}>
+      {[["📋 Total",hws.length,"#7c3aed"],["⏳ Pending",pending,"#ca8a04"],["🚨 Overdue",overdue,"#dc2626"]].map(([l,v,c])=><SBox key={l} label={l} value={v} color={c}/>)}
+    </div>
+    <button onClick={()=>setShowForm(!showForm)} className="btn-outline" style={{marginBottom:14}}>{showForm?"✕ Cancel":"➕ Naya Homework Add Karo"}</button>
+    {showForm&&<Card title="📝 Homework Add Karo">
+      <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+        <SubSel val={sub} onChange={v=>{setSub(v);setChapter("")}}/>
+        <select value={prio} onChange={e=>setPrio(e.target.value)} className="inp" style={{color:PRIO_C[prio],fontWeight:700,width:"auto",flexShrink:0}}>
+          {["High","Medium","Low"].map(p=><option key={p}>{p}</option>)}
+        </select>
+      </div>
+      <button className="btn-outline" style={{marginBottom:10,fontSize:14,color:chapter?SC[sub]:"#a78bfa",borderColor:chapter?SC[sub]:"#ddd6fe"}} onClick={()=>setShowCP(true)}>
+        {chapter?`📚 ${chapter}`:"📚 Chapter Select Karo (optional)"}
+      </button>
+      <input className="inp" value={topic} onChange={e=>setTopic(e.target.value)} placeholder="Topic (optional)..." style={{marginBottom:10}}/>
+      <input className="inp" value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==="Enter"&&add()} placeholder="Homework kya hai..." style={{marginBottom:10}}/>
+      <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+        <span style={{fontSize:15,color:"#6b7280",flexShrink:0,fontWeight:500}}>Due:</span>
+        <input type="date" className="inp" value={due} onChange={e=>setDue(e.target.value)}/>
+      </div>
+      <button className="btn" onClick={add} style={{width:"100%",padding:14}}>✅ Save Karo</button>
+      {showCP&&<ChapterPicker sub={sub} selected={chapter} onSelect={setChapter} onClose={()=>setShowCP(false)}/>}
+    </Card>}
+    <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:6,marginBottom:14}}>
+      {["All","Pending","Done","Overdue"].map(f=><button key={f} onClick={()=>setFilter(f)} className={`filter-btn${filter===f?" on":""}`}>{f}</button>)}
+    </div>
+    {filtered.length===0&&<div style={{color:"#a78bfa",fontSize:15,textAlign:"center",padding:24,background:"#fff",borderRadius:18,border:"1.5px solid #ddd6fe"}}>{filter==="Overdue"?"Koi overdue homework nahi! 🎉":"Koi homework nahi is category mein!"}</div>}
+    {filtered.map(h=>{
+      const isOD=!h.done&&h.due<today;
+      return<div key={h.id} style={{background:"#fff",border:`1.5px solid ${isOD?"#fca5a5":h.done?"#f3f4f6":"#ddd6fe"}`,borderRadius:16,padding:14,marginBottom:10,opacity:h.done?.6:1,boxShadow:"0 2px 10px rgba(124,58,237,0.06)"}}>
+        <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+          <input type="checkbox" checked={h.done} onChange={()=>tog(h.id)} style={{accentColor:"#7c3aed",width:21,height:21,marginTop:2,flexShrink:0}}/>
+          <div style={{flex:1}}>
+            <div style={{fontSize:16,fontWeight:600,color:h.done?"#9ca3af":"#1e1b4b",textDecoration:h.done?"line-through":"none",marginBottom:7}}>{h.text}</div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              <span className="tag" style={{color:SC[h.sub],borderColor:SBR[h.sub],background:SBG[h.sub]}}>{h.sub}</span>
+              {h.chapter&&<span className="tag" style={{color:"#6d28d9",borderColor:"#ddd6fe",background:"#f5f3ff"}}>📚 {h.chapter.length>16?h.chapter.slice(0,16)+"…":h.chapter}</span>}
+              {h.topic&&<span className="tag" style={{color:"#0369a1",borderColor:"#bae6fd",background:"#f0f9ff"}}>🔖 {h.topic}</span>}
+              <span className="tag" style={{color:PRIO_C[h.prio],borderColor:PRIO_C[h.prio]+"60",background:PRIO_C[h.prio]+"12"}}>{h.prio}</span>
+              <span className="tag" style={{color:isOD?"#dc2626":"#6b7280",borderColor:isOD?"#fca5a5":"#e5e7eb",background:isOD?"#fef2f2":"#f9fafb"}}>📅 {h.due}{isOD?" ⚠️":""}</span>
+            </div>
+          </div>
+          <button onClick={()=>del(h.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:20,flexShrink:0}}>✕</button>
+        </div>
+      </div>
+    })}
+  </div>
+}
+function Weekly({timer}){
+  const[note,setNote]=useState(()=>ld(`jt_wn_${wkStart()}`,""));
+  function saveNote(v){setNote(v);sv(`jt_wn_${wkStart()}`,v)}
+  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d});
+  const subTotals={};SUBS.forEach(s=>{subTotals[s]=days.reduce((a,d)=>a+timer.daySecs(dk(d),s),0)});
+  const grand=Object.values(subTotals).reduce((a,b)=>a+b,0);
+  const maxDay=Math.max(...days.map(d=>SUBS.reduce((a,s)=>a+timer.daySecs(dk(d),s),0)),1);
+  return<div className="content">
+    <Card title="📊 Is Hafte Ki Study">
+      <div style={{textAlign:"center",fontSize:16,color:"#7c3aed",marginBottom:16,fontWeight:700}}>Total: {fmtT(grand)}</div>
+      {SUBS.map(s=>{const pct=grand?Math.round(subTotals[s]/grand*100):0;return<div key={s} style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:15,marginBottom:6}}>
+          <span style={{color:SC[s],fontWeight:700}}>{s}</span>
+          <span style={{color:"#6b7280"}}>{fmtT(subTotals[s])} · {pct}%</span>
+        </div><ProgBar pct={pct} color={SC[s]}/></div>})}
+    </Card>
+    <Card title="📅 Daily Breakdown">
+      <div style={{display:"flex",gap:6,alignItems:"flex-end",height:110,paddingBottom:6}}>
+        {days.map(d=>{const key=dk(d);const total=SUBS.reduce((a,s)=>a+timer.daySecs(key,s),0);const h=Math.max((total/maxDay)*85,total>0?6:2);const isToday=key===dk();
+        return<div key={key} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <div style={{fontSize:11,color:"#6b7280",fontWeight:500}}>{total>0?(Math.round(total/360)/10)+"h":""}</div>
+          <div style={{width:"100%",flex:1,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:h,background:isToday?"#7c3aed":"#ddd6fe",borderRadius:"6px 6px 0 0",minHeight:2}}/></div>
+          <div style={{fontSize:13,color:isToday?"#7c3aed":"#9ca3af",fontWeight:isToday?700:400}}>{["S","M","T","W","T","F","S"][d.getDay()]}</div>
+        </div>})}
+      </div>
+    </Card>
+    <Card title="📝 Weekly Review">
+      <textarea className="inp" value={note} onChange={e=>saveNote(e.target.value)} rows={4}
+        placeholder="Is week kya accha gaya? Kya struggle hua? Agle week ki plan..." style={{resize:"vertical",lineHeight:1.7,fontSize:15}}/>
+    </Card>
+  </div>
+}
+function Monthly({timer}){
+  const now=new Date();
+  const[note,setNote]=useState(()=>ld(`jt_mn_${mKey()}`,""));
+  function saveNote(v){setNote(v);sv(`jt_mn_${mKey()}`,v)}
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const monthDays=Array.from({length:daysInMonth},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth(),i+1);return dk(d)});
+  const subTotals={};SUBS.forEach(s=>{subTotals[s]=monthDays.reduce((a,k)=>a+timer.daySecs(k,s),0)});
+  const grand=Object.values(subTotals).reduce((a,b)=>a+b,0);
+  const studyDays=monthDays.filter(k=>SUBS.some(s=>timer.daySecs(k,s)>0)).length;
+  const TARGET=25*3600;
+  const firstDow=new Date(now.getFullYear(),now.getMonth(),1).getDay();
+  return<div className="content">
+    <Card title={`🗓️ ${now.toLocaleString("default",{month:"long"})} ${now.getFullYear()}`}>
+      <div className="grid2" style={{marginBottom:16}}><SBox label="Total Study" value={fmtT(grand)} color="#7c3aed"/><SBox label="Study Days" value={`${studyDays}/${daysInMonth}`} color="#0369a1"/></div>
+      {SUBS.map(s=>{const pct=Math.round(subTotals[s]/TARGET*100);return<div key={s} style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:15,marginBottom:6}}>
+          <span style={{color:SC[s],fontWeight:700}}>{s}</span><span style={{color:"#6b7280"}}>{fmtT(subTotals[s])} / 25h</span>
+        </div><ProgBar pct={pct} color={SC[s]}/><div style={{fontSize:12,color:"#9ca3af",textAlign:"right",marginTop:3}}>{Math.min(pct,100)}% of target</div>
+      </div>})}
+    </Card>
+    <Card title="🔥 Study Heatmap">
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}}>
+        {["S","M","T","W","T","F","S"].map((d,i)=><div key={i} style={{textAlign:"center",fontSize:11,color:"#9ca3af",paddingBottom:6,fontWeight:500}}>{d}</div>)}
+        {Array.from({length:firstDow}).map((_,i)=><div key={`e${i}`}/>)}
+        {monthDays.map(key=>{const total=SUBS.reduce((a,s)=>a+timer.daySecs(key,s),0);const past=key<=dk();const intensity=Math.min(total/7200,1);
+        return<div key={key} className="hmap-cell" style={{background:!past?"#f5f3ff":total===0?"#ede9fe":`rgba(124,58,237,${0.15+intensity*0.85})`}}/>})}
+      </div>
+      <div style={{display:"flex",gap:5,justifyContent:"center",marginTop:12,alignItems:"center"}}>
+        <span style={{fontSize:11,color:"#9ca3af"}}>Less</span>
+        {[0.15,0.35,0.55,0.75,1].map(v=><div key={v} style={{width:14,height:14,borderRadius:3,background:`rgba(124,58,237,${v})`}}/>)}
+        <span style={{fontSize:11,color:"#9ca3af"}}>More</span>
+      </div>
+    </Card>
+    <Card title="📝 Monthly Reflection">
+      <textarea className="inp" value={note} onChange={e=>saveNote(e.target.value)} rows={4}
+        placeholder="Is month ki achievements, struggles, agle month ke targets..." style={{resize:"vertical",lineHeight:1.7,fontSize:15}}/>
+    </Card>
+  </div>
+}
+function Mocks(){
+  const[mocks,setMocks]=useState(()=>ld("jt_mocks",[]));
+  const[showForm,setShowForm]=useState(false);
+  const[date,setDate]=useState(dk());const[type,setType]=useState("JEE Mains");
+  const[scores,setScores]=useState({Physics:"",Chemistry:"",Math:""});const[pctile,setPctile]=useState("");const[weak,setWeak]=useState("");
+  function add(){
+    const phy=parseFloat(scores.Physics)||0,ch=parseFloat(scores.Chemistry)||0,ma=parseFloat(scores.Math)||0;
+    const m={id:Date.now(),date,type,phy,ch,ma,total:phy+ch+ma,pctile:parseFloat(pctile)||0,weak};
+    const next=[m,...mocks].sort((a,b)=>b.date.localeCompare(a.date));
+    setMocks(next);sv("jt_mocks",next);setScores({Physics:"",Chemistry:"",Math:""});setPctile("");setWeak("");setShowForm(false);
+  }
+  function del(id){const n=mocks.filter(m=>m.id!==id);setMocks(n);sv("jt_mocks",n)}
+  const best=mocks.length?Math.max(...mocks.map(m=>m.total)):0;
+  const avg=mocks.length?Math.round(mocks.reduce((a,m)=>a+m.total,0)/mocks.length):0;
+  return<div className="content">
+    <div className="grid3" style={{marginBottom:14}}><SBox label="Mocks Given" value={mocks.length} color="#7c3aed"/><SBox label="Best Score" value={best||"—"} color="#0369a1"/><SBox label="Avg Score" value={avg||"—"} color="#ea580c"/></div>
+    <button onClick={()=>setShowForm(!showForm)} className="btn-outline" style={{marginBottom:14}}>{showForm?"✕ Cancel":"➕ Mock Result Add Karo"}</button>
+    {showForm&&<Card title="📝 Mock Test Entry">
+      <div className="grid2" style={{marginBottom:10}}>
+        <div><div style={{fontSize:14,color:"#6b7280",marginBottom:5,fontWeight:500}}>Date</div><input type="date" className="inp" value={date} onChange={e=>setDate(e.target.value)}/></div>
+        <div><div style={{fontSize:14,color:"#6b7280",marginBottom:5,fontWeight:500}}>Type</div><select className="inp" value={type} onChange={e=>setType(e.target.value)}><option>JEE Mains</option><option>JEE Advanced</option><option>Allen Test</option><option>Other</option></select></div>
+      </div>
+      <div className="grid3" style={{marginBottom:10}}>{SUBS.map(s=><div key={s}><div style={{fontSize:14,color:SC[s],marginBottom:5,fontWeight:700}}>{s}</div><input type="number" className="inp" value={scores[s]} placeholder="Score" onChange={e=>setScores(p=>({...p,[s]:e.target.value}))}/></div>)}</div>
+      <div style={{marginBottom:10}}><div style={{fontSize:14,color:"#6b7280",marginBottom:5,fontWeight:500}}>Percentile</div><input type="number" className="inp" value={pctile} onChange={e=>setPctile(e.target.value)} placeholder="e.g. 85.5"/></div>
+      <div style={{marginBottom:14}}><div style={{fontSize:14,color:"#6b7280",marginBottom:5,fontWeight:500}}>Weak Areas</div><input className="inp" value={weak} onChange={e=>setWeak(e.target.value)} placeholder="e.g. GOC, Limits"/></div>
+      <button className="btn" onClick={add} style={{width:"100%",padding:14}}>💾 Save Karo</button>
+    </Card>}
+    {mocks.map(m=><div key={m.id} style={{background:"#fff",border:"1.5px solid #ddd6fe",borderRadius:16,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(124,58,237,0.06)"}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
+        <div><div style={{fontSize:17,color:"#7c3aed",fontWeight:700}}>{m.type}</div><div style={{fontSize:13,color:"#9ca3af",marginTop:2}}>{m.date}</div></div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{textAlign:"right"}}><div style={{fontSize:28,fontWeight:700,color:"#1e1b4b",letterSpacing:-1}}>{m.total}</div>{m.pctile>0&&<div style={{fontSize:13,color:"#0369a1",fontWeight:600}}>{m.pctile} %ile</div>}</div>
+          <button onClick={()=>del(m.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:20}}>✕</button>
+        </div>
+      </div>
+      <div className="grid3">{[["P",m.phy,"#ea580c","#fff7ed","#fed7aa"],["C",m.ch,"#0369a1","#f0f9ff","#bae6fd"],["M",m.ma,"#7c3aed","#f5f3ff","#ddd6fe"]].map(([l,v,c,bg,br])=><div key={l} style={{background:bg,border:`1.5px solid ${br}`,borderRadius:12,padding:"10px 6px",textAlign:"center"}}><div style={{fontSize:12,color:c,marginBottom:3,fontWeight:700}}>{l}</div><div style={{fontSize:20,color:"#1e1b4b",fontWeight:700}}>{v}</div></div>)}</div>
+      {m.weak&&<div style={{marginTop:10,fontSize:14,color:"#dc2626",background:"#fef2f2",borderRadius:10,padding:"9px 12px",fontWeight:500}}>⚠️ Weak: {m.weak}</div>}
+    </div>)}
+    {mocks.length===0&&<div style={{color:"#a78bfa",fontSize:15,textAlign:"center",padding:24,background:"#fff",borderRadius:18,border:"1.5px solid #ddd6fe"}}>Abhi tak koi mock add nahi kiya!</div>}
+  </div>
+}
+function Stats({timer}){
+  const mocks=ld("jt_mocks",[]);
+  const last30=Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return dk(d)});
+  const sub30={};SUBS.forEach(s=>{sub30[s]=last30.reduce((a,k)=>a+timer.daySecs(k,s),0)});
+  const grand=Object.values(sub30).reduce((a,b)=>a+b,0);
+  const moods=last30.map(k=>ld(`jt_mood_${k}`,0)).filter(v=>v>0);
+  const avgMood=moods.length?(moods.reduce((a,b)=>a+b,0)/moods.length).toFixed(1):"N/A";
+  const totalG=last30.reduce((a,k)=>a+(ld(`jt_g_${k}`,[]).length),0);
+  const doneG=last30.reduce((a,k)=>a+(ld(`jt_g_${k}`,[]).filter(g=>g.done).length),0);
+  const cr=totalG?Math.round(doneG/totalG*100):0;
+  const recent5=mocks.slice(0,5).reverse();
+  const maxMock=recent5.length?Math.max(...recent5.map(m=>m.total),1):300;
+  const insights=[grand<10*3600&&"⚠️ Study hours bahut kam hain — daily 3+ hours ka target rakho!",cr<50&&totalG>3&&"📌 Goal completion rate low hai — chhote realistic goals set karo",sub30.Chemistry<sub30.Math*0.4&&grand>0&&"⚗️ Chemistry ko aur time do — JEE mein bahut easy marks hain NCERT se",mocks.length===0&&"📝 Abhi tak koi mock nahi diya — jaldi ek schedule karo!",mocks.length>2&&mocks[0].total<mocks[1].total&&"📉 Last mock score gira — weak areas pe focus badhao",grand>50*3600&&"🔥 50+ hours complete! Preparation solid hai!","🎯 Target: IIT Delhi CSE | JEE Advanced 300+ | JEE Mains 250+"].filter(Boolean);
+  return<div className="content">
+    <Card title="📈 Last 30 Days">
+      <div className="grid2"><SBox label="Total Study" value={fmtT(grand)} color="#7c3aed"/><SBox label="Goal Done" value={`${cr}%`} color="#0369a1"/><SBox label="Avg Energy" value={avgMood==="N/A"?"N/A":`${avgMood}/5`} color="#ca8a04"/><SBox label="Mocks Given" value={mocks.length} color="#ea580c"/></div>
+    </Card>
+    <Card title="📚 Subject Split (30 days)">
+      {grand===0&&<div style={{color:"#a78bfa",fontSize:14,textAlign:"center",padding:8}}>Abhi koi data nahi</div>}
+      {SUBS.map(s=>{const pct=grand?Math.round(sub30[s]/grand*100):0;return<div key={s} style={{marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",fontSize:15,marginBottom:6}}><span style={{color:SC[s],fontWeight:700}}>{s}</span><span style={{color:"#6b7280"}}>{pct}% · {fmtT(sub30[s])}</span></div><ProgBar pct={pct} color={SC[s]}/></div>})}
+    </Card>
+    {recent5.length>0&&<Card title="🎯 Mock Score Trend">
+      <div style={{display:"flex",gap:8,alignItems:"flex-end",height:100}}>
+        {recent5.map(m=>{const h=Math.max((m.total/maxMock)*80,6);return<div key={m.id} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <div style={{fontSize:12,color:"#6b7280",fontWeight:600}}>{m.total}</div>
+          <div style={{width:"80%",height:h,background:"#7c3aed",borderRadius:"6px 6px 0 0",opacity:.8}}/>
+          <div style={{fontSize:11,color:"#9ca3af"}}>{m.date.slice(5)}</div>
+        </div>})}
+      </div>
+      {mocks.length>1&&<div style={{textAlign:"center",fontSize:15,marginTop:12,fontWeight:700,color:mocks[0].total>=mocks[mocks.length-1].total?"#16a34a":"#dc2626"}}>
+        {mocks[0].total>=mocks[mocks.length-1].total?"📈 Improving!":"📉 Drop detected"} ({Math.abs(mocks[0].total-mocks[mocks.length-1].total)} pts)
+      </div>}
+    </Card>}
+    <Card title="💡 Smart Insights">
+      {insights.map((tip,i)=><div key={i} style={{fontSize:15,color:"#1e1b4b",padding:"12px 14px",background:"#f5f3ff",borderRadius:12,marginBottom:8,borderLeft:"4px solid #7c3aed",lineHeight:1.6,fontWeight:500}}>{tip}</div>)}
+    </Card>
+  </div>
+}
+function App(){
+  const[tab,setTab]=useState(0);
+  const[streak,setStreak]=useState(()=>ld("jt_streak",{count:0,last:""}));
+  const timer=useTimer();
+  const today=dk();
+  useEffect(()=>{
+    if(streak.last!==today){
+      const yd=new Date();yd.setDate(yd.getDate()-1);const yk=dk(yd);
+      const next={count:streak.last===yk?streak.count+1:1,last:today};
+      setStreak(next);sv("jt_streak",next);
+    }
+  },[]);
+  const COMPS=[Daily,Homework,Weekly,Monthly,Mocks,Stats];
+  const Comp=COMPS[tab];
+  return<div style={{minHeight:"100vh",background:"var(--bg)"}}>
+    <div className="header">
+      <div className="header-top">
+        <div><div className="h-sub">JEE 2027 · IIT Delhi CSE</div><div className="h-title">Alok's Command Centre</div></div>
+        <div><div className="streak-fire">🔥</div><div className="streak-txt">{streak.count} day streak</div></div>
+      </div>
+      <div className="timers">
+        {["Physics","Chemistry","Math"].map(s=>{const isOn=timer.active?.sub===s;return<button key={s} className={`tbtn${isOn?" on":""}`} onClick={()=>isOn?timer.stop():timer.start(s)}>
+          <div className="tbtn-lbl">{s.slice(0,4).toUpperCase()}</div>
+          <div className="tbtn-time">{fmtT(timer.liveSecs(s))}</div>
+          <div className="tbtn-status">{isOn?"⏸ Pause":"▶ Start"}</div>
+        </button>})}
+      </div>
+    </div>
+    <Comp timer={timer}/>
+    <nav className="nav">
+      {TABS.map((t,i)=><button key={t} onClick={()=>setTab(i)} className={tab===i?"on":""}>
+        <span className="nav-icon">{TI[i]}</span><span>{t}</span>
+      </button>)}
+    </nav>
+  </div>
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
